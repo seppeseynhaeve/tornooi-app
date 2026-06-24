@@ -13,7 +13,7 @@ class TournamentApp {
   init() {
     this.loadFromStorage();
     this.render();
-    this.attachEventListeners();
+    setTimeout(() => this.attachEventListeners(), 100);
   }
 
   generateSchedule() {
@@ -41,21 +41,21 @@ class TournamentApp {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const player = {
-        id: Date.now(),
-        name: name.trim(),
-        photo: e.target.result,
-        createdAt: new Date().toISOString()
-      };
-      this.players.push(player);
-      this.saveToStorage();
-      this.render();
-      this.clearPlayerForm();
-    };
-    
     if (photoFile) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const player = {
+          id: Date.now(),
+          name: name.trim(),
+          photo: e.target.result,
+          createdAt: new Date().toISOString()
+        };
+        this.players.push(player);
+        this.saveToStorage();
+        this.render();
+        this.clearPlayerForm();
+        setTimeout(() => this.attachEventListeners(), 100);
+      };
       reader.readAsDataURL(photoFile);
     } else {
       const player = {
@@ -68,6 +68,7 @@ class TournamentApp {
       this.saveToStorage();
       this.render();
       this.clearPlayerForm();
+      setTimeout(() => this.attachEventListeners(), 100);
     }
   }
 
@@ -75,6 +76,7 @@ class TournamentApp {
     this.players = this.players.filter(p => p.id !== id);
     this.saveToStorage();
     this.render();
+    setTimeout(() => this.attachEventListeners(), 100);
   }
 
   getDefaultAvatar(name) {
@@ -83,8 +85,10 @@ class TournamentApp {
   }
 
   clearPlayerForm() {
-    const form = document.getElementById('playerForm');
-    if (form) form.reset();
+    const nameInput = document.getElementById('playerName');
+    const photoInput = document.getElementById('playerPhoto');
+    if (nameInput) nameInput.value = '';
+    if (photoInput) photoInput.value = '';
   }
 
   // ========================
@@ -109,7 +113,9 @@ class TournamentApp {
     // Generate matches for each poule
     this.generatePouleMatches();
     this.saveToStorage();
+    this.currentTab = 'draw';
     this.render();
+    setTimeout(() => this.attachEventListeners(), 100);
   }
 
   generatePouleMatches() {
@@ -117,12 +123,10 @@ class TournamentApp {
     let matchId = 0;
     let currentTime = 10 * 60; // 10:00 in minutes
     const matchDuration = 20; // minutes
-    const breakTime = 150; // 12:00-13:30 = 90 minutes, but buffer
     
     for (let pouleIndex = 0; pouleIndex < this.poules.length; pouleIndex++) {
       const poule = this.poules[pouleIndex];
       const players = poule.players;
-      let round = 0;
 
       // Generate round-robin matches
       for (let i = 0; i < players.length; i++) {
@@ -171,7 +175,6 @@ class TournamentApp {
     if (match) {
       match.points[playerIndex] = parseInt(score) || 0;
       this.saveToStorage();
-      this.render();
     }
   }
 
@@ -185,6 +188,7 @@ class TournamentApp {
       
       this.saveToStorage();
       this.render();
+      setTimeout(() => this.attachEventListeners(), 100);
     }
   }
 
@@ -260,7 +264,6 @@ class TournamentApp {
   render() {
     const app = document.getElementById('app');
     app.innerHTML = this.getTemplate();
-    this.attachEventListeners();
   }
 
   getTemplate() {
@@ -531,6 +534,7 @@ class TournamentApp {
       btn.addEventListener('click', (e) => {
         this.currentTab = e.target.dataset.tab;
         this.render();
+        setTimeout(() => this.attachEventListeners(), 100);
       });
     });
 
@@ -555,7 +559,11 @@ class TournamentApp {
     // Draw
     const startDrawBtn = document.getElementById('startDrawBtn');
     if (startDrawBtn) {
-      startDrawBtn.addEventListener('click', () => this.generatePoules());
+      startDrawBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.generatePoules();
+      });
     }
 
     const resetDrawBtn = document.getElementById('resetDrawBtn');
@@ -567,6 +575,7 @@ class TournamentApp {
           this.scores = {};
           this.saveToStorage();
           this.render();
+          setTimeout(() => this.attachEventListeners(), 100);
         }
       });
     }
@@ -577,6 +586,7 @@ class TournamentApp {
       goToPlayersBtn.addEventListener('click', () => {
         this.currentTab = 'players';
         this.render();
+        setTimeout(() => this.attachEventListeners(), 100);
       });
     }
 
@@ -585,6 +595,7 @@ class TournamentApp {
       goToDrawBtn.addEventListener('click', () => {
         this.currentTab = 'draw';
         this.render();
+        setTimeout(() => this.attachEventListeners(), 100);
       });
     }
 
@@ -593,6 +604,7 @@ class TournamentApp {
       goToMatchesBtn.addEventListener('click', () => {
         this.currentTab = 'matches';
         this.render();
+        setTimeout(() => this.attachEventListeners(), 100);
       });
     }
 
